@@ -34,25 +34,6 @@ html, body {
 }
 #secretTrigger { cursor:default; }
 
-/* mode indicator */
-.mode-pill {
-  display:none; background:#1c1c1e; border-radius:20px;
-  padding:5px 14px; font-size:12px; font-weight:500;
-  letter-spacing:0.3px; align-items:center; gap:6px;
-}
-.mode-pill.show { display:flex; }
-.mode-pill .mode-dot { width:6px; height:6px; border-radius:50%; background:#30d158; }
-.mode-pill span { color:#8e8e93; }
-.mode-pill strong { color:#fff; }
-
-/* stop counter */
-.stop-counter {
-  display:none; position:absolute; top:18px; left:50%; transform:translateX(-50%);
-  font-size:13px; color:#48484a; font-variant-numeric:tabular-nums;
-  letter-spacing:0.3px;
-}
-.stop-counter.show { display:block; }
-
 .buttons-section { width:100%; padding:0 32px; }
 .btn-row { display:flex; justify-content:center; align-items:center; gap:44px; width:100%; }
 .circle-btn {
@@ -119,6 +100,16 @@ html, body {
   font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
   background:#1c3320; color:#30d158;
 }
+
+/* radio de modo */
+.mode-radio {
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  border:2px solid #3a3a3c; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; margin-left:auto;
+}
+.mode-radio::after { content:''; width:12px; height:12px; border-radius:50%; background:transparent; }
+.mode-radio.on { border-color:#30d158; }
+.mode-radio.on::after { background:#30d158; }
 
 /* ══ NÚMERO MÁGICO ══ */
 #magicPanel { background:#000; }
@@ -205,57 +196,16 @@ html, body {
 .mn-hint { color:#48484a; font-size:13px; text-align:center; padding:12px 28px 0; }
 .mn-keypad { padding:0 20px 32px; margin-top:auto; }
 
-/* ══ PROGRAMAR ══ */
-#programPanel { background:#000; }
-.prog-list { padding:20px 28px; display:flex; flex-direction:column; gap:8px; }
-.prog-row {
-  background:#0a0a0a; border:0.5px solid #1c1c1e; border-radius:14px;
-  padding:16px 18px; display:flex; align-items:center; gap:12px;
-}
-.prog-num-badge {
-  width:28px; height:28px; border-radius:50%;
-  background:#1c1c1e; color:#636366; font-size:13px; font-weight:500;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.prog-label { color:#fff; font-size:15px; flex:1; }
-.prog-sub   { color:#48484a; font-size:12px; margin-top:2px; }
-.prog-toggle {
-  display:flex; background:#1c1c1e; border-radius:20px; padding:3px; gap:2px; flex-shrink:0;
-}
-.prog-opt {
-  padding:5px 10px; border-radius:16px; font-size:12px; font-weight:500;
-  cursor:pointer; color:#48484a; transition:all 0.15s;
-}
-.prog-opt.active-m { background:#1c3320; color:#30d158; }
-.prog-opt.active-n { background:#1a0a2e; color:#bf5af2; }
-.prog-opt.active-off { background:#222; color:#555; }
-.prog-save {
-  margin:0 28px 32px; background:#1c3320; border-radius:14px;
-  color:#30d158; font-size:17px; font-weight:500; padding:16px;
-  text-align:center; cursor:pointer; border:none;
-}
-.prog-save:active { filter:brightness(0.7); }
-.prog-active-info {
-  margin:0 28px; background:#0a0a0a; border:0.5px solid #1c1c1e;
-  border-radius:14px; padding:14px 18px;
-  color:#48484a; font-size:13px; line-height:1.6;
-}
-.prog-active-info strong { color:#8e8e93; }
 </style>
 </head>
 <body>
 
 <!-- CRONÓMETRO -->
 <div class="screen" id="mainScreen">
-  <div class="stop-counter" id="stopCounter"></div>
   <div class="time-wrap">
     <div class="time-display">
       <span id="secretTrigger">00</span><span id="timeRest">:00,00</span>
     </div>
-  </div>
-  <div class="mode-pill" id="modePill">
-    <div class="mode-dot"></div>
-    <span id="modePillText">Modo activo</span>
   </div>
   <div class="buttons-section">
     <div class="btn-row">
@@ -280,6 +230,7 @@ html, body {
         <div class="card-title">Número mágico</div>
         <div class="card-sub" id="menuMagicSub">Suma de dígitos → 18</div>
       </div>
+      <div class="mode-radio" id="radioMagic" data-mode="magic"></div>
       <div class="card-arrow">›</div>
     </div>
     <div class="menu-card" id="menuGoMyNums">
@@ -288,14 +239,7 @@ html, body {
         <div class="card-title">Mis números</div>
         <div class="card-sub" id="menuMyNumsSub">Segundos exactos predefinidos</div>
       </div>
-      <div class="card-arrow">›</div>
-    </div>
-    <div class="menu-card" id="menuGoProgram">
-      <div class="card-icon ci-orange">⚙️</div>
-      <div class="card-text">
-        <div class="card-title">Programar paradas</div>
-        <div class="card-sub" id="menuProgSub">Sin programa activo</div>
-      </div>
+      <div class="mode-radio" id="radioMyNums" data-mode="mynums"></div>
       <div class="card-arrow">›</div>
     </div>
     <div class="menu-card" id="menuGoLock">
@@ -403,34 +347,15 @@ html, body {
   </div>
 </div>
 
-<!-- PROGRAMAR -->
-<div class="panel" id="programPanel">
-  <div class="p-nav">
-    <div class="p-back" id="progBack">‹ Ajuste</div>
-    <div class="p-nav-title" style="font-size:17px">Programar</div>
-    <div style="width:72px"></div>
-  </div>
-  <div class="prog-list" id="progList"></div>
-
-  <div style="height:16px"></div>
-  <button class="prog-save" id="progSave">Activar programa</button>
-  <div style="height:32px"></div>
-</div>
-
 <script>
 (function(){
   // ── State ──
   let magic = 18;
   let myNums = [];            // list of seconds e.g. [1,5,3]
+  let activeMode = 'magic';   // 'magic' | 'mynums'
   let myNumEntry = '';
   let lockEntry = '';
   let inputEntry = '';
-
-  // Program: array of 5 stops, each: 'magic' | 'mynums' | 'off'
-  let program = ['magic','magic','magic','magic','magic'];
-  let PROG_MAX = 12;
-  let programActive = false;
-  let stopIndex = 0;          // which stop we're on
 
   let running = false, startWall = 0, accumulated = 0, rafId = null;
 
@@ -439,16 +364,12 @@ html, body {
   const timeRest    = document.getElementById('timeRest');
   const btnStart    = document.getElementById('btnStart');
   const btnReset    = document.getElementById('btnReset');
-  const modePill    = document.getElementById('modePill');
-  const modePillTxt = document.getElementById('modePillText');
-  const stopCounter = document.getElementById('stopCounter');
 
   const menuPanel    = document.getElementById('menuPanel');
   const magicPanel   = document.getElementById('magicPanel');
   const inputPanel   = document.getElementById('inputPanel');
   const lockPanel    = document.getElementById('lockPanel');
   const myNumPanel   = document.getElementById('myNumPanel');
-  const programPanel = document.getElementById('programPanel');
 
   const lockDots = [0,1,2,3].map(i=>document.getElementById('ld'+i));
   const inputNum = document.getElementById('inputNum');
@@ -504,15 +425,7 @@ html, body {
     return (best*100 + cs)*10;
   }
 
-  function currentSnapFn(){
-    if(programActive){
-      let mode = program[stopIndex] || 'off';
-      if(mode==='mynums') return snapMyNums;
-      if(mode==='magic')  return snapMagic;
-      return (ms)=>ms; // off = free stop
-    }
-    return snapMagic; // default
-  }
+  function currentSnapFn(){ return activeMode==='mynums' ? snapMyNums : snapMagic; }
 
   function elapsedMs(){ return running?accumulated+(Date.now()-startWall):accumulated; }
   function tick(){ setDisplay(elapsedMs()); rafId=requestAnimationFrame(tick); }
@@ -529,38 +442,18 @@ html, body {
       accumulated=currentSnapFn()(raw);
       setDisplay(accumulated);
       btnStart.textContent='Start'; btnStart.className='circle-btn btn-start';
-      // advance program
-      if(programActive){
-        stopIndex++;
-        if(stopIndex>=program.length||program.slice(stopIndex).every(p=>p==='off')){
-          stopIndex=0; // reset after last meaningful stop
-        }
-        updateModeUI();
-      }
     }
   });
 
   btnReset.addEventListener('click',()=>{
     if(!running){
       accumulated=0; setDisplay(0); btnReset.disabled=true;
-      stopIndex=0; updateModeUI();
     }
   });
 
-  function updateModeUI(){
-    if(!programActive){ modePill.classList.remove('show'); stopCounter.classList.remove('show'); return; }
-    let mode=program[stopIndex]||'off';
-    let label = mode==='magic'?`Número mágico (${magic})` : mode==='mynums'?`Mis números (${myNums.join(', ')})` : 'Libre';
-    modePillTxt.textContent=label;
-    modePill.classList.add('show');
-    let activeStops=program.filter(p=>p!=='off').length;
-    stopCounter.textContent=`Parada ${stopIndex+1} / ${activeStops}`;
-    stopCounter.classList.add('show');
-  }
-
   // ── Panels ──
   function showPanel(p){
-    [menuPanel,magicPanel,inputPanel,lockPanel,myNumPanel,programPanel].forEach(x=>x.classList.remove('show'));
+    [menuPanel,magicPanel,inputPanel,lockPanel,myNumPanel].forEach(x=>x.classList.remove('show'));
     if(p) p.classList.add('show');
   }
 
@@ -568,10 +461,20 @@ html, body {
   document.getElementById('menuClose').addEventListener('click',()=>showPanel(null));
 
   function refreshMenuSubs(){
+    document.getElementById('radioMagic').classList.toggle('on',activeMode==='magic');
+    document.getElementById('radioMyNums').classList.toggle('on',activeMode==='mynums');
     document.getElementById('menuMagicSub').textContent=`Suma de dígitos → ${magic}`;
     document.getElementById('menuMyNumsSub').textContent=myNums.length?`Segundos: ${myNums.join('  ·  ')}`:'Sin números definidos';
-    document.getElementById('menuProgSub').textContent=programActive?`Activo · parada ${stopIndex+1}`:'Sin programa activo';
   }
+
+  // ── Selector de modo (circulitos) ──
+  document.querySelectorAll('.mode-radio').forEach(r=>{
+    r.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      activeMode=r.dataset.mode;
+      refreshMenuSubs();
+    });
+  });
 
   // ── Número mágico ──
   document.getElementById('menuGoMagic').addEventListener('click',()=>{ buildCombos(); showPanel(magicPanel); });
@@ -665,58 +568,6 @@ html, body {
       myNumEntry+=k.dataset.n;
       document.querySelector('#myNumKg .k-ok').textContent=`+ Añadir ${myNumEntry}`;
     }
-  });
-
-  // ── Programar ──
-  document.getElementById('menuGoProgram').addEventListener('click',()=>{ renderProgram(); showPanel(programPanel); });
-  document.getElementById('progBack').addEventListener('click',()=>{ refreshMenuSubs(); showPanel(menuPanel); });
-
-  // Listener registrado una sola vez (delegación)
-  document.getElementById('progList').addEventListener('click',(e)=>{
-    const opt=e.target.closest('[data-mode]'); if(!opt) return;
-    let idx=parseInt(opt.dataset.stop);
-    program[idx]=opt.dataset.mode;
-    renderProgram();
-  });
-
-  function renderProgram(){
-    // Auto-grow: if all slots are active and under max, add one more
-    if(program.length < PROG_MAX && program.every(p=>p!=='off')){
-      program.push('off');
-    }
-
-    const list=document.getElementById('progList');
-    list.innerHTML='';
-    for(let i=0;i<program.length;i++){
-      const mode=program[i];
-      const row=document.createElement('div'); row.className='prog-row';
-      const isNew = i===program.length-1 && program.length>5 && mode==='off';
-      row.innerHTML=`
-        <div class="prog-num-badge" style="${isNew?'color:#30d158;background:#0d2e14':''}">${i+1}</div>
-        <div style="flex:1;">
-          <div style="color:${isNew?'#48484a':'#fff'};font-size:15px;">Parada ${i+1}</div>
-        </div>
-        <div class="prog-toggle">
-          <div class="prog-opt ${mode==='magic'?'active-m':''}" data-stop="${i}" data-mode="magic">Mágico</div>
-          <div class="prog-opt ${mode==='mynums'?'active-n':''}" data-stop="${i}" data-mode="mynums">Mis n.</div>
-          <div class="prog-opt ${mode==='off'?'active-off':''}" data-stop="${i}" data-mode="off">—</div>
-        </div>`;
-      list.appendChild(row);
-    }
-
-    const hint=document.createElement('div');
-    hint.style.cssText='color:#2c2c2e;font-size:12px;text-align:center;padding:10px 0;';
-    hint.textContent = program.length < PROG_MAX
-      ? 'Activa la última parada para añadir más · máx. 12'
-      : 'Máximo 12 paradas alcanzado';
-    list.appendChild(hint);
-  }
-
-  document.getElementById('progSave').addEventListener('click',()=>{
-    let active=program.filter(p=>p!=='off');
-    if(!active.length){ alert('Activa al menos una parada.'); return; }
-    programActive=true; stopIndex=0;
-    updateModeUI(); refreshMenuSubs(); showPanel(null);
   });
 
   // ── Init ──
